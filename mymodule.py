@@ -387,9 +387,6 @@ def rk4(dvdx, y, v, x, dx, x_min, x_max):
                 arry.append(y)#appending
                 arrv.append(v)
                 arrx.append(x)
-        arry.pop()
-        arrx.pop()
-        arrv.pop()
         return arrv, arry, arrx#returning all the list
         
 def shooting(dvdx, x1, y1, x2, y2, z, dx):
