@@ -337,53 +337,94 @@ def euler(f,y,x,x_n,dx):#taking parameter(dy/dx,y(x_0),x_0,x_max,dx)
 	return arry, arrx
 
 def rk4(dvdx, y, v, x, dx, x_min, x_max):
-	arrx=[x]
-	arry=[y]
-	arrv=[v]
-	while x < x_max:
-		k1y = dx*v
-		k1v = dx*dvdx(y, v, x)
+#this function is for solving 2nd order ODE with given y(x_0), dy/dx at x_0 
+#x_min and x_max are boundary of x 
+#dvdx = y''
+        arrx=[x]#creating list to store the values
+        arry=[y]
+        arrv=[v]
+        while x>x_min:#backward loop for boundary
+                k1y = -dx*v
+                k1v = -dx*dvdx(y, v, x)
 		
-		k2y = dx*(v + 0.5*k1v)
-		k2v = dx*dvdx(y + 0.5*k1y, v+0.5*k1y, x+0.5*dx)
+                k2y = -dx*(v + 0.5*k1v)
+                k2v = -dx*dvdx(y + 0.5*k1y, v+0.5*k1y, x-0.5*dx)
 		
-		k3y = dx*(v + 0.5*k2v)
-		k3v = dx*dvdx(y + 0.5*k2y, v+0.5*k2y, x+0.5*dx)
+                k3y = -dx*(v + 0.5*k2v)
+                k3v = -dx*dvdx(y + 0.5*k2y, v+0.5*k2y, x-0.5*dx)
 		
-		k4y = dx*(v + 0.5*k3v)
-		k4v = dx*dvdx(y + k3y, v + k3y, x + dx)
+                k4y = -dx*(v + 0.5*k3v)
+                k4v = -dx*dvdx(y + k3y, v + k3y, x - dx)
 		
-		y += (k2y + 2*k2y + 2*k3y + k4y)/6
-		v += (k2v + 2*k2v + 2*k3v + k4v)/6
-		x += dx
+                y += (k2y + 2*k2y + 2*k3y + k4y)/6
+                v += (k2v + 2*k2v + 2*k3v + k4v)/6
+                x -= dx
 		
-		arry.append(y)
-		arrv.append(v)
-		arrx.append(x)
+                arry.append(y)#appending the values in list
+                arrv.append(v)
+                arrx.append(x)
+        x=arrx[0]#assigning the initial values
+        y=arry[0]
+        v=arrv[0]
+                #print(y,v,x)
+        while x < x_max:#forward loop
+                k1y = dx*v
+                k1v = dx*dvdx(y, v, x)
 		
-	x=arrx[0]
-	y=arry[0]
-	v=arrv[0]
-	print(y,v,x)
-	while x > x_min:
-		k1y = -dx*v
-		k1v = -dx*dvdx(y, v, x)
+                k2y = dx*(v + 0.5*k1v)
+                k2v = dx*dvdx(y + 0.5*k1y, v+0.5*k1y, x+0.5*dx)
+	
+                k3y = dx*(v + 0.5*k2v)
+                k3v = dx*dvdx(y + 0.5*k2y, v+0.5*k2y, x+0.5*dx)
 		
-		k2y = -dx*(v + 0.5*k1v)
-		k2v = -dx*dvdx(y + 0.5*k1y, v+0.5*k1y, x-0.5*dx)
+                k4y = dx*(v + 0.5*k3v)
+                k4v = dx*dvdx(y + k3y, v + k3y, x + dx)
 		
-		k3y = -dx*(v + 0.5*k2v)
-		k3v = -dx*dvdx(y + 0.5*k2y, v+0.5*k2y, x-0.5*dx)
-		
-		k4y = -dx*(v + 0.5*k3v)
-		k4v = -dx*dvdx(y + k3y, v + k3y, x - dx)
-		
-		y += (k2y + 2*k2y + 2*k3y + k4y)/6
-		v += (k2v + 2*k2v + 2*k3v + k4v)/6
-		x -= dx
-		
-		arry.append(y)
-		arrv.append(v)
-		arrx.append(x)
-			
-	return arrv, arry, arrx
+                y += (k2y + 2*k2y + 2*k3y + k4y)/6
+                v += (k2v + 2*k2v + 2*k3v + k4v)/6
+                x += dx
+
+                arry.append(y)#appending
+                arrv.append(v)
+                arrx.append(x)
+        arry.pop()
+        arrx.pop()
+        arrv.pop()
+        return arrv, arry, arrx#returning all the list
+        
+def shooting(dvdx, x1, y1, x2, y2, z, dx):
+#This function is for solving 2nd ODE with boundary values
+#uses rk4 method
+#y1 , y2 are boundary values at x1 and x2 respectively, dx is stepsize
+	def yc(dvdx, y1, z, x1, dx, xl, xh):#defining a function to return the last value of list_y in rk4
+	        v, y, x = rk4(dvdx, y1, z, x1, dx, xl, xh)
+        	return y[-1]
+	beta = yc(dvdx, y1, z, x1, dx, x1, x2)
+	beta_zl=beta
+	beta_zh=beta
+	if abs(beta-y2)<0.001:#
+		v, y, x = rk4(dvdx, y1, z, x1, dx, x1, x2)
+		return v,y,x#returning all the list
+	else:
+		if beta>y2:#if we get the upper bound
+			zh=z
+			while beta>y2:
+				z-=0.5#decreasing to get the lower bound
+				beta=yc(dvdx, y1, z, x1, dx, x1, x2)
+			zl=z
+			beta_zl=beta
+                        #langrange interpolation
+			z=zl+(zh-zl)*(y2-beta_zl)/(beta_zh-beta_zl)
+			v, y, x = rk4(dvdx, y1, z, x1, dx, x1, x2)
+			return v,y,x
+		else:
+			zl=z
+			while beta<y2:#if we get the lower bound
+				z+=0.5#incresing to get upper bound
+				beta=yc(dvdx, y1, z, x1, dx, x1, x2)
+			zh=z
+			beta_zh=beta
+			#langrange interpolation
+			z=zl+(zh-zl)*(y2-beta_zl)/(beta_zh-beta_zl)
+			v, y, x = rk4(dvdx, y1, z, x1, dx, x1, x2)
+		return v,y,x
