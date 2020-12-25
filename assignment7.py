@@ -81,24 +81,12 @@ try:
 	z=float(y)
 	#given y(0)=1, y(1)=2(e-1)
 	#returns x = list consisting all the x between the 2 boundaries, v is the list consisting dy/dx correspondinig to the x list and similiarly list y consisting the y values.
-	v, y, x=mm.shooting(dvdx3, 0, 1, 1, 2*(m.e-1), 1.5, 0.02)
+	with open('q3.txt', "r+") as f:#for dx=0.02
+		v, y, x=mm.shooting(dvdx3, 0, 1, 1, 2*(m.e-1), z, 0.02 )
+		printing(x,y)
 	print("Resulting y(b) =",y[-1])
-	with open('q3p5.txt', "r+") as f:#for dx=0.5
-		v, y, x=mm.shooting(dvdx3, 0, 1, 1, 2*(m.e-1), 1.5, 0.5)		
-		printing(x,y)
 
-	with open('q3p1.txt', "r+") as f:#for dx=0.1
-		v, y, x=mm.shooting(dvdx3, 0, 1, 1, 2*(m.e-1), 1.5, 0.1)
-		printing(x,y)
-
-	with open('q3p05.txt', "r+") as f:#for dx=0.05
-		v, y, x=mm.shooting(dvdx3, 0, 1, 1, 2*(m.e-1), 1.5, 0.05)
-		printing(x,y)
-
-	with open('q3p01.txt', "r+") as f:#for dx=0.01
-		v, y, x=mm.shooting(dvdx3, 0, 1, 1, 2*(m.e-1), 1.5, 0.01)
-		printing(x,y)
-except ValueError:#if not real number
+except ValueError:
 	print('The input value is not a real number')
 	
 '''
